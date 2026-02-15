@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Biblioteca Retro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Biblioteca digital retro compartida">
+<meta name="theme-color" content="#00ff9c">
+
+<!-- FAVICON RETRO -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22black%22/><text y=%22.9em%22 font-size=%2290%22 fill=%22lime%22>📚</text></svg>">
+
+<!-- ICONO MOVIL -->
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAQAAAAAYLlVAAAAKklEQVR4Ae3BAQ0AAADCIPunNscwYAAAAAAAAAAAAAAAAAAAAAAAAAAA4DcB7QAB1z5V4QAAAABJRU5ErkJggg==">
+
+<!-- TIPOGRAFIA PIXEL -->
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+body{
+ margin:0;
+ background:#000;
+ font-family:'Press Start 2P',monospace;
+ color:#00ff9c;
+ overflow-x:hidden;
+}
+
+/* CRT */
+body::after{
+ content:"";
+ position:fixed;
+ inset:0;
+ background:repeating-linear-gradient(
+  to bottom,
+  rgba(0,255,156,.07),
+  rgba(0,255,156,.07) 1px,
+  transparent 1px,
+  transparent 3px);
+ pointer-events:none;
+}
+
+header{
+ text-align:center;
+ padding:35px 15px;
+ border-bottom:3px double #00ff9c;
+}
+
+header img{
+ max-width:240px;
+ border-radius:12px;
+ margin-bottom:20px;
+ box-shadow:0 0 30px #00ff9c66;
+}
+
+h1{font-size:1.5em;margin:0;}
+
+.subtitle{font-size:.7em;color:#7affc9;margin-top:15px;}
+
+.container{
+ max-width:900px;
+ margin:auto;
+ padding:40px 20px;
+ text-align:center;
+}
+
+.search{
+ width:100%;
+ max-width:460px;
+ padding:15px;
+ border:2px solid #00ff9c;
+ background:#000;
+ color:#00ff9c;
+ font-family:'Press Start 2P';
+}
+
+.mainlink{
+ display:inline-block;
+ margin-top:35px;
+ padding:24px 32px;
+ border:2px solid #00ff9c;
+ color:#00ff9c;
+ text-decoration:none;
+ transition:.25s;
+}
+
+.mainlink:hover{
+ background:#00ff9c;
+ color:#000;
+ box-shadow:0 0 30px #00ff9c;
+}
+
+.results{
+ margin-top:30px;
+ font-size:.7em;
+ color:#8affd4;
+}
+
+footer{
+ margin-top:70px;
+ padding:25px;
+ text-align:center;
+ border-top:2px dashed #00ff9c;
+ font-size:.6em;
+ color:#7affc9;
+}
+</style>
+</head>
+<body>
+
+<audio id="bootSound" preload="auto">
+<source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg">
+</audio>
+
+<header>
+<img src="REEMPLAZA_CON_TU_IMAGEN">
+<h1>BIBLIOTECA DIGITAL</h1>
+<div class="subtitle">Sistema Archivo Retro Profesional</div>
+</header>
+
+<div class="container">
+<input class="search" id="searchBox" placeholder="BUSCAR ARCHIVO...">
+
+<br>
+<a class="mainlink" href="https://onedrive.live.com/?id=%2Fpersonal%2Fef04c8f9268c8eaf%2FDocuments%2FDocumentos%2FPEDRO%20MIGUEL%2F%F0%9F%93%96%20Libros%20y%20revistas&sortField=LinkFilename&isAscending=true&viewid=282e7437%2Da2e6%2D4200%2Dbf69%2Dc633c7d20f59&view=0" target="_blank">ABRIR BIBLIOTECA</a>
+
+<div class="results" id="results"></div>
+</div>
+
+<footer>
+Sistema Biblioteca PRO • Ready
+</footer>
+
+<!-- ARRANQUE -->
+<div id="boot" style="position:fixed;inset:0;background:#000;color:#00ff9c;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Press Start 2P';">
+<div id="bootText" style="font-size:.7em;line-height:1.6"></div>
+</div>
+
+<script>
+
+// SONIDO
+window.addEventListener("click",()=>{
+ let a=document.getElementById("bootSound");
+ if(a.paused)a.play();
+},{once:true});
+
+// ARRANQUE TEXTO
+const bootLines=[
+"RETRO BIOS v4.0",
+"Memory check........OK",
+"Storage link........OK",
+"Loading modules",
+"Mounting archive",
+"Launching interface",
+"READY"
+];
+let l=0,c=0;
+let bootText=document.getElementById("bootText");
+function type(){
+ if(l>=bootLines.length){setTimeout(()=>boot.style.display="none",600);return;}
+ let line=bootLines[l];
+ if(c<line.length){bootText.innerHTML+=line[c];c++;setTimeout(type,25);} 
+ else{bootText.innerHTML+="<br>";l++;c=0;setTimeout(type,250);} }
+type();
+
+// BUSCADOR AUTO
+const box=document.getElementById("searchBox");
+const results=document.getElementById("results");
+let archivos=[];
+
+fetch("https://onedrive.live.com/?id=%2Fpersonal%2Fef04c8f9268c8eaf%2FDocuments%2FDocumentos%2FPEDRO%20MIGUEL%2F%F0%9F%93%96%20Libros%20y%20revistas&sortField=LinkFilename&isAscending=true&viewid=282e7437%2Da2e6%2D4200%2Dbf69%2Dc633c7d20f59&view=0")
+.then(r=>r.text())
+.then(t=>{
+ archivos=[...t.matchAll(/aria-label=\"([^\"]+)\"/g)]
+ .map(x=>x[1])
+ .filter(f=>f.match(/\.(pdf|epub|txt|docx?)$/i));
+})
+.catch(()=>results.innerHTML="INDEX ERROR");
+
+box.addEventListener("input",()=>{
+ let v=box.value.toLowerCase();
+ if(!v){results.innerHTML="";return;}
+ let res=archivos.filter(a=>a.toLowerCase().includes(v));
+ results.innerHTML=res.length?res.join("<br>"):"NO RESULTS";
+});
+
+</script>
+
+</body>
+</html>
